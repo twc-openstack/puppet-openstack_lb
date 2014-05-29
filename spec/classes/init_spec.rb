@@ -25,8 +25,9 @@ describe "openstack_lb" do
 
   context "With swift VIP" do
     let :params do
-      { :swift_enabled => true,
-      }.merge(default_params)
+      default_params.merge({
+        :swift_enabled => true,
+      })
     end
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     it { should contain_keepalived__instance('50') }
