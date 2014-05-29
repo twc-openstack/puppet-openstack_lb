@@ -1,0 +1,15 @@
+fixtures:
+  repositories:
+    sysctl: 'https://github.com/puppetlabs/puppetlabs-sysctl.git'
+    keepalived:
+      repo: 'https://github.com/CiscoSystems/puppet-keepalived.git'
+      ref: 'origin/icehouse'
+    haproxy:
+      repo: 'https://github.com/CiscoSystems/puppet-haproxy.git'
+      ref: 'origin/icehouse'
+    concat: 
+      repo: 'https://github.com/puppetlabs/puppetlabs-concat.git'
+      ref: '1.0.0'
+    stdlib: 
+      repo: 'https://github.com/puppetlabs/puppetlabs-stdlib.git'
+      ref: 'v2.2.1'
