@@ -9,7 +9,7 @@
 #
 # Example Usage
 # node 'slb01' {
-#   class {'openstack-ha::load-balancer':
+#   class {'openstack_lb':
 #     controller_virtual_ip   => '10.10.10.10',
 #     swift_proxy_virtual_ip  => '11.11.11.11',
 #     controller_interface    => 'eth0',
@@ -25,7 +25,7 @@
 #   }
 # }
 #
-class openstack-ha::load-balancer(
+class openstack_lb(
   $controller_virtual_ip,
   $controller_state,
   $controller_names,
