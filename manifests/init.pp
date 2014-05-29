@@ -68,12 +68,14 @@ class openstack_lb (
     track_script => [$track_script],
   }
 
-  keepalived::instance { "${swift_vrid}":
-    interface    => $swift_proxy_interface,
-    virtual_ips  => "${swift_proxy_virtual_ip} dev ${swift_proxy_interface}",
-    state        => $swift_proxy_state,
-    priority     => $swift_proxy_priority,
-    track_script => [$track_script],
+  if $swift_enabled {
+    keepalived::instance { "${swift_vrid}":
+      interface    => $swift_proxy_interface,
+      virtual_ips  => "${swift_proxy_virtual_ip} dev ${swift_proxy_interface}",
+      state        => $swift_proxy_state,
+      priority     => $swift_proxy_priority,
+      track_script => [$track_script],
+    }
   }
 
   keepalived::vrrp_script { 'haproxy':
