@@ -87,16 +87,6 @@ class openstack_lb (
   }
 
   class { 'haproxy':
-    manage_service   => false,
-    notify           => [
-      Exec['restart-keystone'],
-      Exec['restart-glance'],
-      Exec['restart-glance-reg'],
-      Exec['restart-cinder'],
-      Exec['restart-novnc'],
-      Exec['stop-apache'],
-      Service['haproxy']
-    ],
     defaults_options => {
       'log'     => 'global',
       'option'  => 'redispatch',
@@ -469,81 +459,5 @@ class openstack_lb (
     }
 
   }
-
-  exec {'restart-keystone':
-    command     => '/usr/sbin/service keystone restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/keystone',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-glance':
-    command     => '/usr/sbin/service glance-api restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/glance-api',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-glance-reg':
-    command     => '/usr/sbin/service glance-registry restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/glance-registry',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-heat':
-    command     => '/usr/sbin/service heat-api restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/heat-api',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-heat-api-cfn':
-    command     => '/usr/sbin/service heat-api-cfn restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/heat-api-cfn',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-heat-api-cloudwatch':
-    command     => '/usr/sbin/service heat-api-cloudwatch restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/heat-api-cloudwatch',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-cinder':
-    command     => '/usr/sbin/service cinder-api restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/cinder-api',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-ceilometer':
-    command     => '/usr/sbin/service ceilometer-api restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/ceilometer-api',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'restart-novnc':
-    command     => '/usr/sbin/service nova-novncproxy restart',
-    onlyif      => '/usr/bin/test -s /etc/init.d/nova-novncproxy',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  exec {'stop-apache':
-    command     => '/usr/sbin/service apache2 stop',
-    onlyif      => '/usr/bin/test -s /etc/init.d/apache2',
-    subscribe   => File['/etc/haproxy/haproxy.cfg'],
-    refreshonly => true
-  }
-
-  service { 'haproxy':
-    ensure  => running,
-    require => Package['haproxy']
-  }
-
 }
 
