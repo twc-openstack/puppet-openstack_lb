@@ -5,8 +5,8 @@ fixtures:
       repo: 'https://github.com/CiscoSystems/puppet-keepalived.git'
       ref: 'origin/icehouse'
     haproxy:
-      repo: 'https://github.com/CiscoSystems/puppet-haproxy.git'
-      ref: 'origin/icehouse'
+      repo: 'https://github.com/puppetlabs/puppetlabs-haproxy.git'
+      ref: '0.5.0'
     concat: 
       repo: 'https://github.com/puppetlabs/puppetlabs-concat.git'
       ref: '1.0.0'

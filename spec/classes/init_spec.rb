@@ -19,6 +19,11 @@ describe "openstack_lb" do
 
   context "MASTER without swift VIP" do
     let(:params) { default_params }
+
+    context "HAProxy" do
+      it { should contain_class('haproxy') }
+    end
+
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     it { should contain_keepalived__instance('50').with_priority(101) }
     it { should_not contain_keepalived__instance('51') }
