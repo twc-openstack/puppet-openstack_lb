@@ -13,6 +13,7 @@ describe "openstack_lb" do
   let :facts do
     { :osfamily => 'Debian',
       :concat_basedir => '/tmp',
+      :fqdn => 'testfqdn.example.com'
     }
   end
 
@@ -35,14 +36,43 @@ describe "openstack_lb" do
     it { should_not contain_keepalived__instance('51') }
   end
 
-  context "With swift VIP" do
+  context "AUTO without swift VIP" do
+    let :params do
+      default_params.merge({
+        :controller_state => 'AUTO',
+      })
+    end
+    it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    # This is random, but should be stable.  The priority for this was
+    # determined by trying it and testing.
+    it { should contain_keepalived__instance('50').with_priority(126) }
+    it { should_not contain_keepalived__instance('51') }
+  end
+
+  context "MASTER with swift VIP" do
     let :params do
       default_params.merge({
         :swift_enabled => true,
+        :swift_proxy_state => 'MASTER',
       })
     end
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     it { should contain_keepalived__instance('50') }
-    it { should contain_keepalived__instance('51') }
+    it { should contain_keepalived__instance('51').with_priority(101) }
+  end
+
+  context "AUTO with swift VIP" do
+    let :params do
+      default_params.merge({
+        :swift_enabled => true,
+        :swift_proxy_state => 'AUTO',
+      })
+    end
+    it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__instance('50') }
+
+    # This is random, but should be stable.  The priority for this was
+    # determined by trying it and testing.
+    it { should contain_keepalived__instance('51').with_priority(58) }
   end
 end

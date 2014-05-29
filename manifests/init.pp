@@ -27,7 +27,7 @@
 #
 class openstack_lb (
   $controller_virtual_ip,
-  $controller_state,
+  $controller_state         = 'AUTO',
   $controller_names,
   $controller_ipaddresses,
   $controller_vrid          = '50',
@@ -35,7 +35,7 @@ class openstack_lb (
   $controller_interface     = 'eth0',
   $swift_enabled            = false,
   $swift_proxy_virtual_ip   = undef,
-  $swift_proxy_state        = undef,
+  $swift_proxy_state        = 'AUTO',
   $swift_proxy_names        = undef,
   $swift_proxy_ipaddresses  = undef,
   $swift_proxy_interface    = $controller_interface_real,
@@ -48,12 +48,16 @@ class openstack_lb (
 
   if ($controller_state == 'MASTER') {
     $controller_priority = '101'
+  } elsif ($controller_state == 'AUTO') {
+    $controller_priority = fqdn_rand(254, "MAIN VIP")
   } else {
     $controller_priority = '100'
   }
 
   if ($swift_proxy_state == 'MASTER') {
     $swift_proxy_priority = '101'
+  } elsif ($swift_proxy_state == 'AUTO') {
+    $swift_proxy_priority = fqdn_rand(254, "SWIFT VIP")
   } else {
     $swift_proxy_priority = '100'
   }
