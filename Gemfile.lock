@@ -40,4 +40,4 @@ DEPENDENCIES
   puppet-parse
   puppetlabs_spec_helper
   rake (= 10.1.1)
-  rspec
+  rspec-puppet (~> 1.0)
