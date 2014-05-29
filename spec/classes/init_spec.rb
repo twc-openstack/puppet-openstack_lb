@@ -16,10 +16,22 @@ describe "openstack_lb" do
     }
   end
 
-  context "Without swift VIP" do
+  context "MASTER without swift VIP" do
     let(:params) { default_params }
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
-    it { should contain_keepalived__instance('50') }
+    it { should contain_keepalived__instance('50').with_priority(101) }
+    it { should_not contain_keepalived__instance('51') }
+  end
+
+  context "SLAVE without swift VIP" do
+    let :params do
+      default_params.merge({
+        :controller_state => 'SLAVE',
+      })
+    end
+
+    it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__instance('50').with_priority(100) }
     it { should_not contain_keepalived__instance('51') }
   end
 
