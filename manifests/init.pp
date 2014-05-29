@@ -60,7 +60,7 @@ class openstack_lb (
 
   sysctl::value { 'net.ipv4.ip_nonlocal_bind': value => '1' }
 
-  keepalived::instance { "${controller_vrid}":
+  keepalived::instance { $controller_vrid:
     interface    => $controller_interface_real,
     virtual_ips  => "${controller_virtual_ip} dev ${controller_interface_real}",
     state        => $controller_state,
@@ -69,7 +69,7 @@ class openstack_lb (
   }
 
   if $swift_enabled {
-    keepalived::instance { "${swift_vrid}":
+    keepalived::instance { $swift_vrid:
       interface    => $swift_proxy_interface,
       virtual_ips  => "${swift_proxy_virtual_ip} dev ${swift_proxy_interface}",
       state        => $swift_proxy_state,
