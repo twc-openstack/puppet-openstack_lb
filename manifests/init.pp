@@ -49,7 +49,7 @@ class openstack_lb (
   if ($controller_state == 'MASTER') {
     $controller_priority = '101'
   } elsif ($controller_state == 'AUTO') {
-    $controller_priority = fqdn_rand(254, "MAIN VIP")
+    $controller_priority = fqdn_rand(254, 'MAIN VIP')
   } else {
     $controller_priority = '100'
   }
@@ -57,7 +57,7 @@ class openstack_lb (
   if ($swift_proxy_state == 'MASTER') {
     $swift_proxy_priority = '101'
   } elsif ($swift_proxy_state == 'AUTO') {
-    $swift_proxy_priority = fqdn_rand(254, "SWIFT VIP")
+    $swift_proxy_priority = fqdn_rand(254, 'SWIFT VIP')
   } else {
     $swift_proxy_priority = '100'
   }
