@@ -25,7 +25,7 @@
 #   }
 # }
 #
-class openstack_lb(
+class openstack_lb (
   $controller_virtual_ip,
   $controller_state,
   $controller_names,
@@ -42,12 +42,7 @@ class openstack_lb(
   $track_script             = 'haproxy',
 ) {
 
-  if $keepalived_interface {
-      warning('Using $keepalived_interface has been deprecated in favor of $controller_interface and will be removed.')
-      $controller_interface_real = $keepalived_interface
-  } else {
-      $controller_interface_real = $controller_interface
-  }
+  $controller_interface_real = $controller_interface
 
   include keepalived
 
@@ -65,7 +60,7 @@ class openstack_lb(
 
   sysctl::value { 'net.ipv4.ip_nonlocal_bind': value => '1' }
 
-  keepalived::instance { "$controller_vrid":
+  keepalived::instance { "${controller_vrid}":
     interface    => $controller_interface_real,
     virtual_ips  => "${controller_virtual_ip} dev ${controller_interface_real}",
     state        => $controller_state,
@@ -73,7 +68,7 @@ class openstack_lb(
     track_script => [$track_script],
   }
 
-  keepalived::instance { "$swift_vrid":
+  keepalived::instance { "${swift_vrid}":
     interface    => $swift_proxy_interface,
     virtual_ips  => "${swift_proxy_virtual_ip} dev ${swift_proxy_interface}",
     state        => $swift_proxy_state,
@@ -87,7 +82,15 @@ class openstack_lb(
 
   class { 'haproxy':
     manage_service   => false,
-    notify           => [Exec['restart-keystone'],Exec['restart-glance'],Exec['restart-glance-reg'],Exec['restart-cinder'],Exec['restart-novnc'],Exec['stop-apache'],Service['haproxy']],
+    notify           => [
+      Exec['restart-keystone'],
+      Exec['restart-glance'],
+      Exec['restart-glance-reg'],
+      Exec['restart-cinder'],
+      Exec['restart-novnc'],
+      Exec['stop-apache'],
+      Service['haproxy']
+    ],
     defaults_options => {
       'log'     => 'global',
       'option'  => 'redispatch',
