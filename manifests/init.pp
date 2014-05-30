@@ -78,26 +78,28 @@ class openstack_lb (
 
   sysctl::value { 'net.ipv4.ip_nonlocal_bind': value => '1' }
 
-  keepalived::instance { $controller_vrid:
-    interface    => $controller_interface_real,
-    virtual_ips  => "${controller_virtual_ip} dev ${controller_interface_real}",
-    state        => $controller_state_real,
-    priority     => $controller_priority,
-    track_script => [$track_script],
+  keepalived::vrrp::instance { 'openstack-main':
+    virtual_router_id => $controller_vrid,
+    interface         => $controller_interface_real,
+    virtual_ipaddress => $controller_virtual_ip,
+    state             => $controller_state_real,
+    priority          => $controller_priority,
+    track_script      => [$track_script],
   } -> Class['::haproxy']
 
   if $swift_enabled {
-    keepalived::instance { $swift_vrid:
-      interface    => $swift_proxy_interface,
-      virtual_ips  => "${swift_proxy_virtual_ip} dev ${swift_proxy_interface}",
-      state        => $swift_proxy_state_real,
-      priority     => $swift_proxy_priority,
-      track_script => [$track_script],
+    keepalived::vrrp::instance { 'openstack-swift':
+      virtual_router_id => $swift_vrid,
+      interface         => $swift_proxy_interface,
+      virtual_ipaddress => $swift_proxy_virtual_ip,
+      state             => $swift_proxy_state_real,
+      priority          => $swift_proxy_priority,
+      track_script      => [$track_script],
     } -> Class['::haproxy']
   }
 
-  keepalived::vrrp_script { 'haproxy':
-    name_is_process   => true,
+  keepalived::vrrp::script { 'haproxy':
+    script => 'killall -0 haproxy',
   }
 
   class { 'haproxy':

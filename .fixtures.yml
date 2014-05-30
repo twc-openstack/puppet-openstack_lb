@@ -2,8 +2,8 @@ fixtures:
   repositories:
     sysctl: 'https://github.com/puppetlabs/puppetlabs-sysctl.git'
     keepalived:
-      repo: 'https://github.com/CiscoSystems/puppet-keepalived.git'
-      ref: 'origin/icehouse'
+      repo: 'https://github.com/arioch/puppet-keepalived.git'
+      ref: '0.0.13'
     haproxy:
       repo: 'https://github.com/puppetlabs/puppetlabs-haproxy.git'
       ref: '0.5.0'
@@ -12,4 +12,4 @@ fixtures:
       ref: '1.0.0'
     stdlib: 
       repo: 'https://github.com/puppetlabs/puppetlabs-stdlib.git'
-      ref: 'v2.2.1'
+      ref: '4.2.1'

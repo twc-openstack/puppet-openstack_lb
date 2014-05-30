@@ -25,9 +25,9 @@ describe "openstack_lb" do
     end
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
-    it { should contain_keepalived__instance('50').with_priority(101) }
-    it { should contain_keepalived__instance('50').with_state('MASTER') }
-    it { should_not contain_keepalived__instance('51') }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(101) }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_state('MASTER') }
+    it { should_not contain_keepalived__vrrp__instance('openstack-swift') }
   end
 
   context "BACKUP without swift VIP" do
@@ -38,9 +38,9 @@ describe "openstack_lb" do
     end
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
-    it { should contain_keepalived__instance('50').with_priority(100) }
-    it { should contain_keepalived__instance('50').with_state('BACKUP') }
-    it { should_not contain_keepalived__instance('51') }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(100) }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_state('BACKUP') }
+    it { should_not contain_keepalived__vrrp__instance('openstack-swift') }
   end
 
   context "AUTO without swift VIP" do
@@ -52,9 +52,9 @@ describe "openstack_lb" do
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     # This is random, but should be stable.  The priority for this was
     # determined by trying it and testing.
-    it { should contain_keepalived__instance('50').with_priority(126) }
-    it { should contain_keepalived__instance('50').with_state('MASTER') }
-    it { should_not contain_keepalived__instance('51') }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(126) }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_state('MASTER') }
+    it { should_not contain_keepalived__vrrp__instance('openstack-swift') }
   end
 
   context "MASTER with swift VIP" do
@@ -65,9 +65,9 @@ describe "openstack_lb" do
       })
     end
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
-    it { should contain_keepalived__instance('50') }
-    it { should contain_keepalived__instance('51').with_priority(101) }
-    it { should contain_keepalived__instance('51').with_state('MASTER') }
+    it { should contain_keepalived__vrrp__instance('openstack-main') }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_priority(101) }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('MASTER') }
   end
 
   context "BACKUP with swift VIP" do
@@ -79,9 +79,9 @@ describe "openstack_lb" do
     end
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
-    it { should contain_keepalived__instance('50') }
-    it { should contain_keepalived__instance('51').with_priority(100) }
-    it { should contain_keepalived__instance('51').with_state('BACKUP') }
+    it { should contain_keepalived__vrrp__instance('openstack-main') }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_priority(100) }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('BACKUP') }
   end
 
   context "AUTO with swift VIP" do
@@ -92,11 +92,11 @@ describe "openstack_lb" do
       })
     end
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
-    it { should contain_keepalived__instance('50') }
+    it { should contain_keepalived__vrrp__instance('openstack-main') }
 
     # This is random, but should be stable.  The priority for this was
     # determined by trying it and testing.
-    it { should contain_keepalived__instance('51').with_priority(58) }
-    it { should contain_keepalived__instance('51').with_state('MASTER') }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_priority(58) }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('MASTER') }
   end
 end
