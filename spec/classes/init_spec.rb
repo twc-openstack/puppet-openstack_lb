@@ -25,8 +25,10 @@ describe "openstack_lb" do
     end
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__vrrp__script('haproxy').with_no_weight('true') }
     it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(101) }
     it { should contain_keepalived__vrrp__instance('openstack-main').with_state('MASTER') }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_nopreempt(false) }
     it { should_not contain_keepalived__vrrp__instance('openstack-swift') }
   end
 
@@ -38,8 +40,10 @@ describe "openstack_lb" do
     end
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__vrrp__script('haproxy').with_no_weight('true') }
     it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(100) }
     it { should contain_keepalived__vrrp__instance('openstack-main').with_state('BACKUP') }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_nopreempt(false) }
     it { should_not contain_keepalived__vrrp__instance('openstack-swift') }
   end
 
@@ -50,10 +54,10 @@ describe "openstack_lb" do
       })
     end
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
-    # This is random, but should be stable.  The priority for this was
-    # determined by trying it and testing.
-    it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(126) }
-    it { should contain_keepalived__vrrp__instance('openstack-main').with_state('MASTER') }
+    it { should contain_keepalived__vrrp__script('haproxy').with_no_weight('true') }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(100) }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_state('BACKUP') }
+    it { should contain_keepalived__vrrp__instance('openstack-main').with_nopreempt(true) }
     it { should_not contain_keepalived__vrrp__instance('openstack-swift') }
   end
 
@@ -65,9 +69,11 @@ describe "openstack_lb" do
       })
     end
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__vrrp__script('haproxy').with_no_weight('true') }
     it { should contain_keepalived__vrrp__instance('openstack-main') }
     it { should contain_keepalived__vrrp__instance('openstack-swift').with_priority(101) }
     it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('MASTER') }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_nopreempt(false) }
   end
 
   context "BACKUP with swift VIP" do
@@ -79,9 +85,11 @@ describe "openstack_lb" do
     end
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__vrrp__script('haproxy').with_no_weight('true') }
     it { should contain_keepalived__vrrp__instance('openstack-main') }
     it { should contain_keepalived__vrrp__instance('openstack-swift').with_priority(100) }
     it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('BACKUP') }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_nopreempt(false) }
   end
 
   context "AUTO with swift VIP" do
@@ -92,11 +100,10 @@ describe "openstack_lb" do
       })
     end
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__vrrp__script('haproxy').with_no_weight('true') }
     it { should contain_keepalived__vrrp__instance('openstack-main') }
-
-    # This is random, but should be stable.  The priority for this was
-    # determined by trying it and testing.
-    it { should contain_keepalived__vrrp__instance('openstack-swift').with_priority(58) }
-    it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('MASTER') }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_priority(100) }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('BACKUP') }
+    it { should contain_keepalived__vrrp__instance('openstack-swift').with_nopreempt(true) }
   end
 end

@@ -2,8 +2,8 @@ fixtures:
   repositories:
     sysctl: 'https://github.com/puppetlabs/puppetlabs-sysctl.git'
     keepalived:
-      repo: 'https://github.com/arioch/puppet-keepalived.git'
-      ref: '0.0.13'
+      repo: 'https://github.com/twc-openstack/puppet-keepalived.git'
+      ref: 'origin/no_weight'
     haproxy:
       repo: 'https://github.com/puppetlabs/puppetlabs-haproxy.git'
       ref: '0.5.0'

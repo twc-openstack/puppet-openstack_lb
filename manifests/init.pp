@@ -1,6 +1,7 @@
 # Introduction
-# Class used to manage server load-balancers in a
-# high-availability OpenStack deployment.
+
+# Class used to manage server load-balancers in a high-availability OpenStack
+# deployment.
 #
 # Module Dependencies
 #  puppet-sysctl
@@ -25,6 +26,11 @@
 #   }
 # }
 #
+# The controller and swift state variables default to auto, which means that
+# nothing should need to be done in most cases.  What this translates to in
+# practice is that all VRRP instances will be set to an initial state of BACKUP
+# and set to not preempt an existing master.
+
 class openstack_lb (
   $controller_virtual_ip,
   $controller_state         = 'AUTO',
@@ -39,26 +45,20 @@ class openstack_lb (
   $swift_proxy_names        = undef,
   $swift_proxy_ipaddresses  = undef,
   $swift_proxy_interface    = $controller_interface_real,
+  $no_weight                = true,
 ) {
 
   $controller_interface_real = $controller_interface
 
   include keepalived
 
-  # In the following two sections we try determine how to configure the
-  # keepalived initial state and priority.  Keep in mind that the state
-  # variable actually only controls the VRRP initial state and actually doesn't
-  # have much impact. Because of this, we always set it to 'MASTER' if it's on
-  # auto.  The VRRP priority actually ends up being mostly the same way.  We
-  # try to pick a useful priority that is unique per node, but it turns out
-  # that keepalived will break ties by looking at the IP address of the node,
-  # so even if we end up with identical priorities, things will still work.
   if ($controller_state == 'MASTER') {
     $controller_priority = '101'
     $controller_state_real = $controller_state
   } elsif ($controller_state == 'AUTO') {
-    $controller_priority = fqdn_rand(254, 'MAIN VIP')
-    $controller_state_real = 'MASTER'
+    $controller_priority = 100
+    $controller_state_real = 'BACKUP'
+    $controller_nopreempt = true
   } else {
     $controller_priority = '100'
     $controller_state_real = 'BACKUP'
@@ -68,8 +68,9 @@ class openstack_lb (
     $swift_proxy_priority = '101'
     $swift_proxy_state_real = $swift_proxy_state
   } elsif ($swift_proxy_state == 'AUTO') {
-    $swift_proxy_priority = fqdn_rand(254, 'SWIFT VIP')
-    $swift_proxy_state_real = 'MASTER'
+    $swift_proxy_priority = 100
+    $swift_proxy_state_real = 'BACKUP'
+    $swift_nopreempt = true
   } else {
     $swift_proxy_priority = '100'
     $swift_proxy_state_real = 'BACKUP'
@@ -84,6 +85,7 @@ class openstack_lb (
     state             => $controller_state_real,
     priority          => $controller_priority,
     track_script      => ['haproxy'],
+    nopreempt         => $controller_nopreempt,
   } -> Class['::haproxy']
 
   if $swift_enabled {
@@ -94,11 +96,13 @@ class openstack_lb (
       state             => $swift_proxy_state_real,
       priority          => $swift_proxy_priority,
       track_script      => ['haproxy'],
+      nopreempt         => $swift_nopreempt,
     } -> Class['::haproxy']
   }
 
   keepalived::vrrp::script { 'haproxy':
-    script => 'killall -0 haproxy',
+    script    => 'killall -0 haproxy',
+    no_weight => $no_weight,
   }
 
   class { 'haproxy':
