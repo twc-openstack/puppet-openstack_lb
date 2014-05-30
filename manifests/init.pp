@@ -70,7 +70,7 @@ class openstack_lb (
     state        => $controller_state,
     priority     => $controller_priority,
     track_script => [$track_script],
-  }
+  } -> Class['::haproxy']
 
   if $swift_enabled {
     keepalived::instance { $swift_vrid:
@@ -79,7 +79,7 @@ class openstack_lb (
       state        => $swift_proxy_state,
       priority     => $swift_proxy_priority,
       track_script => [$track_script],
-    }
+    } -> Class['::haproxy']
   }
 
   keepalived::vrrp_script { 'haproxy':
