@@ -473,5 +473,15 @@ class openstack_lb (
     }
 
   }
+
+  # Borrowed from Michael Chapman's openstacklib module
+  # Openstack services depend on being able to access db and mq, so make
+  # sure our VIPs and LB are active before we deal with them.
+  Haproxy::Listen<||> -> Anchor <| title == 'mysql::server::start' |>
+  Haproxy::Listen<||> -> Anchor <| title == 'rabbitmq::begin' |>
+  Haproxy::Balancermember<||> -> Anchor <| title == 'mysql::server::start' |>
+  Haproxy::Balancermember<||> -> Anchor <| title == 'rabbitmq::begin' |>
+  Service<| title == 'haproxy' |> -> Anchor <| title == 'rabbitmq::begin' |>
+  Service<| title == 'haproxy' |> -> Anchor <| title == 'mysql::server::start' |>
 }
 
