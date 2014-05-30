@@ -8,4 +8,4 @@ PuppetSyntax.exclude_paths = ["vendor/**/*"]
 PuppetLint.configuration.ignore_paths = ["spec/**/*.pp", "vendor/**/*.pp"]
 
 task(:default).clear
-task :default => [ :lint, :parse, :spec ]
+task :default => [ :lint, :syntax, :spec ]
