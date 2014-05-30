@@ -39,7 +39,6 @@ class openstack_lb (
   $swift_proxy_names        = undef,
   $swift_proxy_ipaddresses  = undef,
   $swift_proxy_interface    = $controller_interface_real,
-  $track_script             = 'haproxy',
 ) {
 
   $controller_interface_real = $controller_interface
@@ -84,7 +83,7 @@ class openstack_lb (
     virtual_ipaddress => $controller_virtual_ip,
     state             => $controller_state_real,
     priority          => $controller_priority,
-    track_script      => [$track_script],
+    track_script      => ['haproxy'],
   } -> Class['::haproxy']
 
   if $swift_enabled {
@@ -94,7 +93,7 @@ class openstack_lb (
       virtual_ipaddress => $swift_proxy_virtual_ip,
       state             => $swift_proxy_state_real,
       priority          => $swift_proxy_priority,
-      track_script      => [$track_script],
+      track_script      => ['haproxy'],
     } -> Class['::haproxy']
   }
 
