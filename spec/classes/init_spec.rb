@@ -26,18 +26,20 @@ describe "openstack_lb" do
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     it { should contain_keepalived__instance('50').with_priority(101) }
+    it { should contain_keepalived__instance('50').with_state('MASTER') }
     it { should_not contain_keepalived__instance('51') }
   end
 
-  context "SLAVE without swift VIP" do
+  context "BACKUP without swift VIP" do
     let :params do
       default_params.merge({
-        :controller_state => 'SLAVE',
+        :controller_state => 'BACKUP',
       })
     end
 
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     it { should contain_keepalived__instance('50').with_priority(100) }
+    it { should contain_keepalived__instance('50').with_state('BACKUP') }
     it { should_not contain_keepalived__instance('51') }
   end
 
@@ -51,6 +53,7 @@ describe "openstack_lb" do
     # This is random, but should be stable.  The priority for this was
     # determined by trying it and testing.
     it { should contain_keepalived__instance('50').with_priority(126) }
+    it { should contain_keepalived__instance('50').with_state('MASTER') }
     it { should_not contain_keepalived__instance('51') }
   end
 
@@ -64,6 +67,21 @@ describe "openstack_lb" do
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     it { should contain_keepalived__instance('50') }
     it { should contain_keepalived__instance('51').with_priority(101) }
+    it { should contain_keepalived__instance('51').with_state('MASTER') }
+  end
+
+  context "BACKUP with swift VIP" do
+    let :params do
+      default_params.merge({
+        :swift_enabled => true,
+        :swift_proxy_state => 'BACKUP',
+      })
+    end
+
+    it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
+    it { should contain_keepalived__instance('50') }
+    it { should contain_keepalived__instance('51').with_priority(100) }
+    it { should contain_keepalived__instance('51').with_state('BACKUP') }
   end
 
   context "AUTO with swift VIP" do
@@ -79,5 +97,6 @@ describe "openstack_lb" do
     # This is random, but should be stable.  The priority for this was
     # determined by trying it and testing.
     it { should contain_keepalived__instance('51').with_priority(58) }
+    it { should contain_keepalived__instance('51').with_state('MASTER') }
   end
 end

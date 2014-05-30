@@ -46,20 +46,34 @@ class openstack_lb (
 
   include keepalived
 
+  # In the following two sections we try determine how to configure the
+  # keepalived initial state and priority.  Keep in mind that the state
+  # variable actually only controls the VRRP initial state and actually doesn't
+  # have much impact. Because of this, we always set it to 'MASTER' if it's on
+  # auto.  The VRRP priority actually ends up being mostly the same way.  We
+  # try to pick a useful priority that is unique per node, but it turns out
+  # that keepalived will break ties by looking at the IP address of the node,
+  # so even if we end up with identical priorities, things will still work.
   if ($controller_state == 'MASTER') {
     $controller_priority = '101'
+    $controller_state_real = $controller_state
   } elsif ($controller_state == 'AUTO') {
     $controller_priority = fqdn_rand(254, 'MAIN VIP')
+    $controller_state_real = 'MASTER'
   } else {
     $controller_priority = '100'
+    $controller_state_real = 'BACKUP'
   }
 
   if ($swift_proxy_state == 'MASTER') {
     $swift_proxy_priority = '101'
+    $swift_proxy_state_real = $swift_proxy_state
   } elsif ($swift_proxy_state == 'AUTO') {
     $swift_proxy_priority = fqdn_rand(254, 'SWIFT VIP')
+    $swift_proxy_state_real = 'MASTER'
   } else {
     $swift_proxy_priority = '100'
+    $swift_proxy_state_real = 'BACKUP'
   }
 
   sysctl::value { 'net.ipv4.ip_nonlocal_bind': value => '1' }
@@ -67,7 +81,7 @@ class openstack_lb (
   keepalived::instance { $controller_vrid:
     interface    => $controller_interface_real,
     virtual_ips  => "${controller_virtual_ip} dev ${controller_interface_real}",
-    state        => $controller_state,
+    state        => $controller_state_real,
     priority     => $controller_priority,
     track_script => [$track_script],
   } -> Class['::haproxy']
@@ -76,7 +90,7 @@ class openstack_lb (
     keepalived::instance { $swift_vrid:
       interface    => $swift_proxy_interface,
       virtual_ips  => "${swift_proxy_virtual_ip} dev ${swift_proxy_interface}",
-      state        => $swift_proxy_state,
+      state        => $swift_proxy_state_real,
       priority     => $swift_proxy_priority,
       track_script => [$track_script],
     } -> Class['::haproxy']
