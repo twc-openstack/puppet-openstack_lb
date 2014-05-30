@@ -20,10 +20,6 @@ describe "openstack_lb" do
   context "MASTER without swift VIP" do
     let(:params) { default_params }
 
-    context "HAProxy" do
-      it { should contain_class('haproxy') }
-    end
-
     it { should contain_sysctl__value('net.ipv4.ip_nonlocal_bind') }
     it { should contain_keepalived__vrrp__script('haproxy').with_no_weight('true') }
     it { should contain_keepalived__vrrp__instance('openstack-main').with_priority(101) }
@@ -106,4 +102,21 @@ describe "openstack_lb" do
     it { should contain_keepalived__vrrp__instance('openstack-swift').with_state('BACKUP') }
     it { should contain_keepalived__vrrp__instance('openstack-swift').with_nopreempt(true) }
   end
+
+  context "HAProxy" do
+    let(:params) { default_params }
+
+    it { should contain_class('haproxy') }
+    it { should contain_haproxy__balancermember('galera-primary').with(
+      :server_names => 'controller-001',
+      :ipaddresses => '10.0.0.2',
+      :options => 'check port 9200 inter 2000 rise 2 fall 5',
+    )}
+    it { should contain_haproxy__balancermember('galera-backup').with(
+      :server_names => ['controller-002', 'controller-003'],
+      :ipaddresses => ['10.0.0.3', '10.0.0.4'],
+      :options => 'check port 9200 inter 2000 rise 2 fall 5 backup',
+    )}
+  end
+
 end

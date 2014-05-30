@@ -138,13 +138,22 @@ class openstack_lb (
     }
   }
 
-  haproxy::balancermember { 'galera':
+  haproxy::balancermember { 'galera-primary':
     listening_service => 'galera_cluster',
     ports             => '3306',
-    server_names      => $controller_names,
-    ipaddresses       => $controller_ipaddresses,
+    server_names      => $controller_names[0],
+    ipaddresses       => $controller_ipaddresses[0],
     # Note: Checking port 9200 due to health_check script.
     options           => 'check port 9200 inter 2000 rise 2 fall 5',
+  }
+
+  haproxy::balancermember { 'galera-backup':
+    listening_service => 'galera_cluster',
+    ports             => '3306',
+    server_names      => delete_at($controller_names, 0),
+    ipaddresses       => delete_at($controller_ipaddresses, 0),
+    # Note: Checking port 9200 due to health_check script.
+    options           => 'check port 9200 inter 2000 rise 2 fall 5 backup',
   }
 
   haproxy::listen { 'rabbit_cluster':
