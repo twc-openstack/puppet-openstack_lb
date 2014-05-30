@@ -105,7 +105,13 @@ class openstack_lb (
     no_weight => $no_weight,
   }
 
+  $global = {
+      log => '/dev/log local0 notice',
+  }
+
+  include haproxy::params
   class { 'haproxy':
+    global_options   => merge($::haproxy::params::global_options, $global),
     defaults_options => {
       'log'     => 'global',
       'option'  => 'redispatch',
@@ -119,7 +125,7 @@ class openstack_lb (
         'check 10s',
       ],
       'maxconn' => '8000'
-    }
+    },
   }
 
   haproxy::listen { 'galera_cluster':
