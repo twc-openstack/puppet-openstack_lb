@@ -107,12 +107,12 @@ describe "openstack_lb" do
     let(:params) { default_params }
 
     it { should contain_class('haproxy') }
-    it { should contain_haproxy__balancermember('galera-primary').with({
+    it { should contain_haproxy__balancermember('galera_primary_main').with({
       :server_names => 'controller-001',
       :ipaddresses => '10.0.0.2',
       :options => 'check port 9200 inter 2000 rise 2 fall 5',
     })}
-    it { should contain_haproxy__balancermember('galera-backup').with({
+    it { should contain_haproxy__balancermember('galera_backup_main').with({
       :server_names => ['controller-002', 'controller-003'],
       :ipaddresses => ['10.0.0.3', '10.0.0.4'],
       :options => 'check port 9200 inter 2000 rise 2 fall 5 backup',

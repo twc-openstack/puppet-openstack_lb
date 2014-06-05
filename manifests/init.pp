@@ -46,6 +46,7 @@ class openstack_lb (
   $swift_proxy_ipaddresses  = undef,
   $swift_proxy_interface    = $controller_interface_real,
   $no_weight                = true,
+  $galera_create_main       = true,
 ) {
 
   $controller_interface_real = $controller_interface
@@ -128,32 +129,12 @@ class openstack_lb (
     },
   }
 
-  haproxy::listen { 'galera_cluster':
-    ipaddress => $controller_virtual_ip,
-    ports     => '3306',
-    options   => {
-      'option'  => ['httpchk'],
-      'mode'    => 'tcp',
-      'balance' => 'source'
+  if $galera_create_main {
+    ::openstack_lb::galera { 'main':
+      virtual_ip => $controller_virtual_ip,
+      dest_names => $controller_names,
+      dest_ipaddresses => $controller_ipaddresses,
     }
-  }
-
-  haproxy::balancermember { 'galera-primary':
-    listening_service => 'galera_cluster',
-    ports             => '3306',
-    server_names      => $controller_names[0],
-    ipaddresses       => $controller_ipaddresses[0],
-    # Note: Checking port 9200 due to health_check script.
-    options           => 'check port 9200 inter 2000 rise 2 fall 5',
-  }
-
-  haproxy::balancermember { 'galera-backup':
-    listening_service => 'galera_cluster',
-    ports             => '3306',
-    server_names      => delete_at($controller_names, 0),
-    ipaddresses       => delete_at($controller_ipaddresses, 0),
-    # Note: Checking port 9200 due to health_check script.
-    options           => 'check port 9200 inter 2000 rise 2 fall 5 backup',
   }
 
   haproxy::listen { 'rabbit_cluster':
