@@ -6,6 +6,7 @@ group :development, :test do
   gem 'rake', '10.1.1'
   gem 'rspec-puppet', '~>1.0'
   gem 'puppet-syntax'
+  gem "mocha", "~> 0.10.5", :require => false
   gem 'rspec', '~> 2.10.0', :require => false
 end
 
