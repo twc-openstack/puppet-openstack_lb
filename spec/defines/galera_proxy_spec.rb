@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'openstack_lb::galera' do
+describe 'openstack_lb::galera_proxy' do
 
   let(:title) { 'test' }
   let :params do 

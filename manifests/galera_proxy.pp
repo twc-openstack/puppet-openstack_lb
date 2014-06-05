@@ -1,4 +1,4 @@
-define openstack_lb::galera (
+define openstack_lb::galera_proxy (
   $virtual_ip,
   $virtual_port = 3306,
   $dest_names,
