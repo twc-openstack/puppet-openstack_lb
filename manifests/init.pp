@@ -131,8 +131,8 @@ class openstack_lb (
 
   if $galera_create_main {
     ::openstack_lb::galera { 'main':
-      virtual_ip => $controller_virtual_ip,
-      dest_names => $controller_names,
+      virtual_ip       => $controller_virtual_ip,
+      dest_names       => $controller_names,
       dest_ipaddresses => $controller_ipaddresses,
     }
   }
