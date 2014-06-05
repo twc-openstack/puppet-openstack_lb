@@ -1,3 +1,31 @@
+# == Define: openstack_lb::galera_proxy
+#
+# This defined type will allow you to define multiple listening ports and
+# destinations for galera clusters.  This can be useful if you have multiple
+# galera clusters, or if you just want to have different ones active for
+# different services.  This will explicitly set up HAProxy in an active/passive
+# configuration to avoid the issues described here:
+# http://lists.openstack.org/pipermail/openstack-dev/2014-May/035264.html
+#
+# === Parameters
+#
+# [*virtual_ip*]
+#   The IP address to listen on.  This will generally be one of the ones you've
+#   already configured to be managed by keepalived.  Required.
+#
+# [*virtual_port*]
+#   The TCP port to listen on.  Default: 3306.
+#
+# [*dest_names*]
+#   The names of the servers to load balance to.  Required, but
+#   strictly informational.
+#
+# [*dest_ipaddresses]
+#   The IP addresses of the servers to load balance to.  Required.
+#
+# [*dest_port*]
+#   The port on the destination IP addresses to load balance to.  Default: 3306.
+#
 define openstack_lb::galera_proxy (
   $virtual_ip,
   $virtual_port = 3306,
