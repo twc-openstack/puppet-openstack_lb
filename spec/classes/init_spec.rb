@@ -103,7 +103,7 @@ describe "openstack_lb" do
     it { should contain_keepalived__vrrp__instance('openstack-swift').with_nopreempt(true) }
   end
 
-  context "HAProxy" do
+  context "HAProxy w/normal Keystone" do
     let(:params) { default_params }
 
     it { should contain_class('haproxy') }
@@ -116,6 +116,37 @@ describe "openstack_lb" do
       :server_names => ['controller-002', 'controller-003'],
       :ipaddresses => ['10.0.0.3', '10.0.0.4'],
       :options => 'check port 9200 inter 2000 rise 2 fall 5 backup',
+    })}
+
+    it { should contain_haproxy__balancermember('keystone_public_internal').with({
+      :server_names => ['controller-001', 'controller-002', 'controller-003'],
+      :ipaddresses => ['10.0.0.2', '10.0.0.3', '10.0.0.4'],
+    })}
+  end
+
+  context "HAProxy w/separate Keystone" do
+    let :params do
+      default_params.merge({
+        :keystone_names => ['keystone-001', 'keystone-002', 'keystone-003'],
+        :keystone_ipaddresses => ['192.168.0.1', '192.168.0.2', '192.168.0.3'],
+      })
+    end
+
+    it { should contain_class('haproxy') }
+    it { should contain_haproxy__balancermember('galera_primary_main').with({
+      :server_names => 'controller-001',
+      :ipaddresses => '10.0.0.2',
+      :options => 'check port 9200 inter 2000 rise 2 fall 5',
+    })}
+    it { should contain_haproxy__balancermember('galera_backup_main').with({
+      :server_names => ['controller-002', 'controller-003'],
+      :ipaddresses => ['10.0.0.3', '10.0.0.4'],
+      :options => 'check port 9200 inter 2000 rise 2 fall 5 backup',
+    })}
+
+    it { should contain_haproxy__balancermember('keystone_public_internal').with({
+      :server_names => ['keystone-001', 'keystone-002', 'keystone-003'],
+      :ipaddresses => ['192.168.0.1', '192.168.0.2', '192.168.0.3'],
     })}
   end
 
