@@ -43,6 +43,7 @@ class openstack_lb (
   $keystone_ipaddresses        = false,
   $keystone_backup_ipaddresses = false,
   $keystone_backup_names       = false,
+  $keystone_health_check_port  = 9201,
   $swift_enabled               = false,
   $swift_proxy_virtual_ip      = undef,
   $swift_proxy_state           = 'AUTO',
@@ -195,7 +196,7 @@ class openstack_lb (
     ports             => '5000',
     server_names      => $ks_names_real,
     ipaddresses       => $ks_ips_real,
-    options           => 'check inter 2000 rise 2 fall 5',
+    options           => "check port ${keystone_health_check_port} inter 2000 rise 2 fall 5",
   }
 
   if $keystone_backup_ipaddresses and $keystone_backup_names {
@@ -204,7 +205,7 @@ class openstack_lb (
       ports             => '5000',
       server_names      => $keystone_backup_names,
       ipaddresses       => $keystone_backup_ipaddresses,
-      options           => 'check inter 2000 rise 2 fall 5 backup',
+      options           => "check port ${keystone_health_check_port} inter 2000 rise 2 fall 5 backup",
     }
   }
 
@@ -222,7 +223,7 @@ class openstack_lb (
     ports             => '35357',
     server_names      => $ks_names_real,
     ipaddresses       => $ks_ips_real,
-    options           => 'check inter 2000 rise 2 fall 5',
+    options           => "check port ${keystone_health_check_port} inter 2000 rise 2 fall 5",
   }
 
   if $keystone_backup_ipaddresses and $keystone_backup_names {
@@ -231,7 +232,7 @@ class openstack_lb (
       ports             => '35357',
       server_names      => $keystone_backup_names,
       ipaddresses       => $keystone_backup_ipaddresses,
-      options           => 'check inter 2000 rise 2 fall 5 backup',
+      options           => "check port ${keystone_health_check_port} inter 2000 rise 2 fall 5 backup",
     }
   }
 
