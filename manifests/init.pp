@@ -33,22 +33,24 @@
 
 class openstack_lb (
   $controller_virtual_ip,
-  $controller_state         = 'AUTO',
+  $controller_state            = 'AUTO',
   $controller_names,
   $controller_ipaddresses,
-  $controller_vrid          = '50',
-  $swift_vrid               = '51',
-  $controller_interface     = 'eth0',
-  $keystone_names           = false,
-  $keystone_ipaddresses     = false,
-  $swift_enabled            = false,
-  $swift_proxy_virtual_ip   = undef,
-  $swift_proxy_state        = 'AUTO',
-  $swift_proxy_names        = undef,
-  $swift_proxy_ipaddresses  = undef,
-  $swift_proxy_interface    = $controller_interface_real,
-  $no_weight                = true,
-  $galera_create_main       = true,
+  $controller_vrid             = '50',
+  $swift_vrid                  = '51',
+  $controller_interface        = 'eth0',
+  $keystone_names              = false,
+  $keystone_ipaddresses        = false,
+  $keystone_backup_ipaddresses = false,
+  $keystone_backup_names       = false,
+  $swift_enabled               = false,
+  $swift_proxy_virtual_ip      = undef,
+  $swift_proxy_state           = 'AUTO',
+  $swift_proxy_names           = undef,
+  $swift_proxy_ipaddresses     = undef,
+  $swift_proxy_interface       = $controller_interface_real,
+  $no_weight                   = true,
+  $galera_create_main          = true,
 ) {
 
   $controller_interface_real = $controller_interface
@@ -92,6 +94,13 @@ class openstack_lb (
   } else {
     $ks_ips_real = $controller_ipaddresses
     $ks_names_real = $controller_names
+  }
+
+  if $keystone_backup_names and ! $keystone_backup_ipaddresses {
+    fail('Parameter $keystone_backup_names was given, but $keystone_backup_ipaddresses was not!')
+  }
+  if $keystone_backup_ipaddresses and ! $keystone_backup_names {
+    fail('Parameter $keystone_backup_ipaddresses was given, but $keystone_backup_names was not!')
   }
 
   sysctl::value { 'net.ipv4.ip_nonlocal_bind': value => '1' }
@@ -176,12 +185,12 @@ class openstack_lb (
     ipaddress => $controller_virtual_ip,
     ports     => '5000',
     options   => {
-      'option'  => ['tcpka', 'httpchk', 'tcplog'],
+      'option'  => ['tcpka', 'httpchk', 'tcplog', 'allbackups'],
       'balance' => 'source'
     }
   }
 
-  haproxy::balancermember { 'keystone_public_internal':
+  haproxy::balancermember { 'keystone_public_internal_primary':
     listening_service => 'keystone_public_internal_cluster',
     ports             => '5000',
     server_names      => $ks_names_real,
@@ -189,21 +198,41 @@ class openstack_lb (
     options           => 'check inter 2000 rise 2 fall 5',
   }
 
+  if $keystone_backup_ipaddresses and $keystone_backup_names {
+    haproxy::balancermember { 'keystone_public_internal_backup':
+      listening_service => 'keystone_public_internal_cluster',
+      ports             => '5000',
+      server_names      => $keystone_backup_names,
+      ipaddresses       => $keystone_backup_ipaddresses,
+      options           => 'check inter 2000 rise 2 fall 5 backup',
+    }
+  }
+
   haproxy::listen { 'keystone_admin_cluster':
     ipaddress => $controller_virtual_ip,
     ports     => '35357',
     options   => {
-      'option'  => ['tcpka', 'httpchk', 'tcplog'],
+      'option'  => ['tcpka', 'httpchk', 'tcplog', 'allbackups'],
       'balance' => 'source'
     }
   }
 
-  haproxy::balancermember { 'keystone_admin':
+  haproxy::balancermember { 'keystone_admin_primary':
     listening_service => 'keystone_admin_cluster',
     ports             => '35357',
     server_names      => $ks_names_real,
     ipaddresses       => $ks_ips_real,
     options           => 'check inter 2000 rise 2 fall 5',
+  }
+
+  if $keystone_backup_ipaddresses and $keystone_backup_names {
+    haproxy::balancermember { 'keystone_admin_backup':
+      listening_service => 'keystone_admin_cluster',
+      ports             => '35357',
+      server_names      => $keystone_backup_names,
+      ipaddresses       => $keystone_backup_ipaddresses,
+      options           => 'check inter 2000 rise 2 fall 5 backup',
+    }
   }
 
   haproxy::listen { 'nova_ec2_api_cluster':
