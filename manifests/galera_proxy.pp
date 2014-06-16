@@ -40,7 +40,9 @@ define openstack_lb::galera_proxy (
     options   => {
       'option'  => ['httpchk'],
       'mode'    => 'tcp',
-      'balance' => 'source'
+      'balance' => 'source',
+      'timeout server' => "3600000",
+      'timeout client' => "3600000",
     }
   }
 
