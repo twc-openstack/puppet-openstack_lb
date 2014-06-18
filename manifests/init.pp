@@ -425,7 +425,7 @@ class openstack_lb (
   }
 
   # Note: Failures were experienced when the balance-member was named Horizon.
-  haproxy::listen { 'dashboard_cluster':
+  haproxy::listen { 'dashboard_cluster_http':
     ipaddress => $controller_virtual_ip,
     ports     => '80',
     options   => {
@@ -439,9 +439,30 @@ class openstack_lb (
   }
 
   # Note: Failures were experienced when the balance-member was named Horizon.
-  haproxy::balancermember { 'dashboard':
-    listening_service => 'dashboard_cluster',
+  haproxy::balancermember { 'dashboard_http':
+    listening_service => 'dashboard_cluster_http',
     ports             => '80',
+    server_names      => $controller_names,
+    ipaddresses       => $controller_ipaddresses,
+    options           => 'check inter 2000 rise 2 fall 5',
+    define_cookies    => true
+  }
+
+  # Note: Failures were experienced when the balance-member was named Horizon.
+  haproxy::listen { 'dashboard_cluster_https':
+    ipaddress => $controller_virtual_ip,
+    ports     => '443',
+    options   => {
+      'mode'      => 'tcp',
+      'balance'   => 'source',
+      'hash-type' => 'consistent',
+    }
+  }
+
+  # Note: Failures were experienced when the balance-member was named Horizon.
+  haproxy::balancermember { 'dashboard_https':
+    listening_service => 'dashboard_cluster_https',
+    ports             => '443',
     server_names      => $controller_names,
     ipaddresses       => $controller_ipaddresses,
     options           => 'check inter 2000 rise 2 fall 5',
