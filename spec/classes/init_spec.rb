@@ -178,8 +178,9 @@ describe "openstack_lb" do
 
     it { should contain_haproxy__listen('keystone_public_internal_cluster').with({
       :options => {
-        'option' => [ 'tcpka', 'httpchk', 'tcplog', 'allbackups'],
+        'option' => [ 'tcpka', 'httpchk /v2.0', 'tcplog', 'allbackups'],
         'balance' => 'source',
+        'http-check' => 'expect status 200',
       }
     })}
 
@@ -195,8 +196,9 @@ describe "openstack_lb" do
 
     it { should contain_haproxy__listen('keystone_admin_cluster').with({
       :options => {
-        'option' => [ 'tcpka', 'httpchk', 'tcplog', 'allbackups'],
+        'option' => [ 'tcpka', 'httpchk /v2.0', 'tcplog', 'allbackups'],
         'balance' => 'source',
+        'http-check' => 'expect status 200',
       }
     })}
 
