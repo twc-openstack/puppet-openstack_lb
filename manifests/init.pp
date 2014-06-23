@@ -466,7 +466,6 @@ class openstack_lb (
     server_names      => $controller_names,
     ipaddresses       => $controller_ipaddresses,
     options           => 'check inter 2000 rise 2 fall 5',
-    define_cookies    => true
   }
 
   # Uncomment if using NoVNC
