@@ -326,8 +326,9 @@ class openstack_lb (
     ipaddress => $controller_virtual_ip,
     ports     => '8777',
     options   => {
-      'option'  => ['tcpka', 'httpchk', 'tcplog'],
-      'balance' => 'source'
+      'option'     => ['tcpka', 'tcplog', 'httpchk HEAD /'],
+      'http-check' => 'expect status 401',
+      'balance'    => 'source'
     }
   }
 
