@@ -449,26 +449,6 @@ class openstack_lb (
     define_cookies    => true
   }
 
-  # Note: Failures were experienced when the balance-member was named Horizon.
-  haproxy::listen { 'dashboard_cluster_https':
-    ipaddress => $controller_virtual_ip,
-    ports     => '443',
-    options   => {
-      'mode'      => 'tcp',
-      'balance'   => 'source',
-      'hash-type' => 'consistent',
-    }
-  }
-
-  # Note: Failures were experienced when the balance-member was named Horizon.
-  haproxy::balancermember { 'dashboard_https':
-    listening_service => 'dashboard_cluster_https',
-    ports             => '443',
-    server_names      => $controller_names,
-    ipaddresses       => $controller_ipaddresses,
-    options           => 'check inter 2000 rise 2 fall 5',
-  }
-
   # Uncomment if using NoVNC
   haproxy::listen { 'novnc_cluster':
     ipaddress => $controller_virtual_ip,
