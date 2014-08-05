@@ -237,23 +237,6 @@ class openstack_lb (
     }
   }
 
-  haproxy::listen { 'nova_ec2_api_cluster':
-    ipaddress => $controller_virtual_ip,
-    ports     => '8773',
-    options   => {
-      'option'  => ['tcpka', 'tcplog'],
-      'balance' => 'source'
-    }
-  }
-
-  haproxy::balancermember { 'nova_ec2':
-    listening_service => 'nova_ec2_api_cluster',
-    ports             => '8773',
-    server_names      => $controller_names,
-    ipaddresses       => $controller_ipaddresses,
-    options           => 'check inter 2000 rise 2 fall 5',
-  }
-
   haproxy::listen { 'nova_osapi_cluster':
     ipaddress => $controller_virtual_ip,
     ports     => '8774',
@@ -266,23 +249,6 @@ class openstack_lb (
   haproxy::balancermember { 'nova_osapi':
     listening_service => 'nova_osapi_cluster',
     ports             => '8774',
-    server_names      => $controller_names,
-    ipaddresses       => $controller_ipaddresses,
-    options           => 'check inter 2000 rise 2 fall 5',
-  }
-
-  haproxy::listen { 'nova_metadata_api_cluster':
-    ipaddress => $controller_virtual_ip,
-    ports     => '8775',
-    options   => {
-      'option'  => ['tcpka', 'tcplog'],
-      'balance' => 'source'
-    }
-  }
-
-  haproxy::balancermember { 'nova_metadata':
-    listening_service => 'nova_metadata_api_cluster',
-    ports             => '8775',
     server_names      => $controller_names,
     ipaddresses       => $controller_ipaddresses,
     options           => 'check inter 2000 rise 2 fall 5',
