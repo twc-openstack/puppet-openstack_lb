@@ -51,6 +51,7 @@ class openstack_lb (
   $swift_proxy_interface       = $controller_interface_real,
   $no_weight                   = true,
   $galera_create_main          = true,
+  $stats_net                   = undef,
 ) {
 
   $controller_interface_real = $controller_interface
@@ -452,6 +453,26 @@ class openstack_lb (
     options           => 'check inter 2000 rise 2 fall 5',
   }
 
+  if $stats_net {
+    haproxy::listen { 'stats':
+      ipaddress => $swift_proxy_virtual_ip,
+      ports     => '9000',
+      options   => {
+        'mode' => 'http',
+        'acl' => "local_net src $stats_net",
+        'stats' => [
+          'uri /',
+          'refresh 60s',
+          'show-node',
+          'show-legends',
+          'http-request allow if local_net',
+          'http-request deny',
+          'admin if local_net',
+        ]
+      }
+    }
+  }
+
   if $swift_enabled {
 
     haproxy::listen { 'swift_proxy_cluster':
@@ -500,4 +521,3 @@ class openstack_lb (
   Service<| title == 'haproxy' |> -> Anchor <| title == 'rabbitmq::begin' |>
   Service<| title == 'haproxy' |> -> Anchor <| title == 'mysql::server::start' |>
 }
-
