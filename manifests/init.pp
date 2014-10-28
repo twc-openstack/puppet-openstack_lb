@@ -410,8 +410,8 @@ class openstack_lb (
   haproxy::balancermember { 'dashboard_http':
     listening_service => 'dashboard_cluster_http',
     ports             => '80',
-    server_names      => $controller_names,
-    ipaddresses       => $controller_ipaddresses,
+    server_names      => $keystone_names,
+    ipaddresses       => $keystone_ipaddresses,
     options           => 'check inter 2000 rise 2 fall 5',
     define_cookies    => true
   }
