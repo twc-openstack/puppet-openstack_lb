@@ -52,6 +52,9 @@ class openstack_lb (
   $no_weight                   = true,
   $galera_create_main          = true,
   $stats_net                   = undef,
+  $monasca_enabled             = false,
+  $monasca_names               = false,
+  $monasca_ipaddresses         = false,
 ) {
 
   $controller_interface_real = $controller_interface
@@ -509,6 +512,43 @@ class openstack_lb (
       options           => 'check inter 2000 rise 2 fall 5',
     }
 
+  }
+  if $monasca_enabled {
+    haproxy::balancermember { 'monasca_api':
+      listening_service => 'monasca_api_cluster',
+      ports             => '8082',
+      server_names      => $monasca_names,
+      ipaddresses       => $monasca_ipaddresses,
+      options           => "check inter 2000 rise 2 fall 5",
+    }
+
+    haproxy::listen { 'monasca_api_cluster':
+      ipaddress => $controller_virtual_ip,
+      ports     => '8082',
+      options   => {
+        'option'     => ['tcpka', 'tcplog', 'httpchk HEAD /'],
+        'http-check' => 'expect status 401',
+        'balance'    => 'source'
+      }
+    }
+
+    haproxy::balancermember { 'influxdb_api':
+      listening_service => 'influxdb_api_cluster',
+      ports             => '8086',
+      server_names      => $monasca_names,
+      ipaddresses       => $monasca_ipaddresses,
+      options           => "check inter 2000 rise 2 fall 5",
+    }
+
+    haproxy::listen { 'influxdb_api_cluster':
+      ipaddress => $controller_virtual_ip,
+      ports     => '8086',
+      options   => {
+        'option'     => ['tcpka', 'httpchk /ping', 'tcplog'],
+        'http-check' => 'expect status 200',
+        'balance'    => 'source',
+      }
+    }
   }
 
   # Borrowed from Michael Chapman's openstacklib module
