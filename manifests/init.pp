@@ -257,6 +257,23 @@ class openstack_lb (
     ipaddresses       => $controller_ipaddresses,
     options           => 'check inter 2000 rise 2 fall 5',
   }
+  
+  haproxy::listen { ‘nova_metadata_cluster':
+    ipaddress => $controller_virtual_ip,
+    ports     => '8775',
+    options   => {
+      'option'  => ['tcpka', 'httpchk', 'tcplog'],
+      'balance' => 'source’
+    }
+  }
+
+  haproxy::balancermember { ‘nova_metadata':
+    listening_service => ‘nova_metadata_cluster',
+    ports             => '8775',
+    server_names      => $controller_names,
+    ipaddresses       => $controller_ipaddresses,
+    options           => 'check inter 2000 rise 2 fall 5',
+  }
 
   haproxy::listen { 'neutron_api_cluster':
     ipaddress => $controller_virtual_ip,
